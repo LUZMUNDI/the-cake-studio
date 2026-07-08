@@ -7,6 +7,9 @@
 
 /* ---------- Tokens ---------- */
 :root {
+  /* Site is light-only — stops mobile dark mode from painting the root canvas
+     (and UA form controls) black. */
+  color-scheme: light;
   --cream: #FFFDF9;
   --cream-2: #FBF3EC;
   --cream-3: #F6E9DE;
@@ -30,10 +33,11 @@
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; background: var(--cream); }
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--cream);
+  min-height: 100vh;
   color: var(--ink);
   line-height: 1.65;
   font-size: 16px;
@@ -213,6 +217,23 @@ h1, h2, h3, .serif {
   border-radius: 50%; object-fit: cover;
   border: 10px solid #fff; box-shadow: var(--shadow-lg);
 }
+/* Hero photo carousel — same circle/border/shadow as the old static image.
+   Cream background on the box and each slide so fades never flash dark. */
+.hero-carousel {
+  position: relative; z-index: 2;
+  width: 84%; aspect-ratio: 1; margin: 0 auto;
+  border-radius: 50%; overflow: hidden;
+  border: 10px solid #fff; box-shadow: var(--shadow-lg);
+  background: var(--cream);
+}
+.hero-carousel .hc-slide {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  background: var(--cream);
+  opacity: 0; transition: opacity 1s ease-in-out;
+  will-change: opacity;
+}
+.hero-carousel .hc-slide.is-active { opacity: 1; }
 .float-card {
   position: absolute; z-index: 3;
   background: #fff; border-radius: 18px; padding: 9px;
@@ -406,13 +427,24 @@ h1, h2, h3, .serif {
 .cat-block { margin-top: 26px; scroll-margin-top: 92px; }
 [id] { scroll-margin-top: 92px; }
 .cat-title {
-  display:flex; align-items:center; gap: 14px; margin-bottom: 26px;
+  position: relative; display:flex; align-items:center; gap: 14px; margin-bottom: 26px;
+  padding-right: 50px; cursor: pointer; user-select: none;
 }
 .cat-title h2 { font-size: 1.8rem; white-space: nowrap; }
 .cat-title .em { font-size: 1.7rem; }
 .cat-title::after { content:""; height:1px; flex:1; background: var(--cream-3); }
+/* collapse toggle (injected by JS) — sits in the reserved right padding */
+.cat-toggle {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%) rotate(180deg);
+  width: 38px; height: 38px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; font-size: .8rem; line-height: 1;
+  color: var(--fuchsia); background: var(--fuchsia-soft);
+  transition: transform .35s var(--ease), background .2s;
+}
+.cat-title:hover .cat-toggle { background: var(--fuchsia); color: #fff; }
+.cat-block.collapsed .cat-toggle { transform: translateY(-50%) rotate(0deg); }
 
-.menu-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 26px; }
+.menu-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 26px; transition: max-height .45s var(--ease); }
 .prod {
   background:#fff; border-radius: var(--radius); overflow:hidden;
   box-shadow: var(--shadow-sm); display:flex; flex-direction:column;

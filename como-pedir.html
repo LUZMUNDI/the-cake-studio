@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFFDF9">
+<meta name="color-scheme" content="light">
 <title>Cómo Pedir · Pide por WhatsApp | TheCakeStudio Santiago</title>
 <meta name="description" content="Pedir en TheCakeStudio es muy fácil: elige tu producto, llena el formulario y envía tu pedido por WhatsApp. Repostería artesanal sin premezclas en Santiago. Tortas con 72 h de anticipación.">
 <meta name="keywords" content="pedir torta Santiago, repostería artesanal Santiago, tortas venezolanas Chile, postres sin premezclas Santiago, repostería a mano Macul">
@@ -99,7 +101,8 @@
         </div>
         <div class="field">
           <label>Tu nombre</label>
-          <input type="text" name="nombre" placeholder="¿Cómo te llamas?" required>
+          <input type="text" name="nombre" placeholder="Nombre y apellido" autocomplete="name" required>
+          <p class="lead-error field-hidden" data-name-error>Por favor ingresa tu nombre completo real (nombre y apellido).</p>
         </div>
         <button type="submit" id="submitBtn" class="btn btn-primary btn-block btn-lg">Enviar pedido por WhatsApp 💬</button>
         <p class="modal-fine">Te responderemos con los detalles de pago y confirmación.</p>

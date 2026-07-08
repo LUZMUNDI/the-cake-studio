@@ -28,8 +28,8 @@ const CATALOG = [
   { g: '🍮 Postres', items: [
     { name: 'Tres Leches', price: 6990 },
     { name: 'Mini Chocoquesillo', price: 10400 },
-    { name: 'Mini Postres Shots (mín. 6)', price: 1500 },
-    { name: 'Mini Postres Gourmet Shot (mín. 6)', price: 1800 },
+    { name: 'Mini Postres Shots (mín. 6)', price: 1500, min: 6 },
+    { name: 'Mini Postres Gourmet Shot (mín. 6)', price: 1800, min: 6 },
     { name: 'Cheesecake de Chocolate', price: 4990 },
     { name: 'Roll de Canela', price: 3990 },
     { name: 'Marble Cake', price: null },
@@ -46,7 +46,7 @@ const CATALOG = [
   ]},
   { g: '🍪 Galletas', items: [
     { name: 'Galletitas Pasta Seca (200g)', price: 6500 },
-    { name: 'Galleta New York', price: 2990 },
+    { name: 'Galleta New York', price: 2990, min: 4 },
     { name: 'Galletas Craqueladas', price: 10990 },
   ]},
   { g: '🥐 Bollería Venezolana', items: [
@@ -60,17 +60,24 @@ const CATALOG = [
   ]},
 ];
 
-// Flat lookup: name -> { price, torta }
+// Flat lookup: name -> { price, torta, min }
 const PRODUCTS = {};
 CATALOG.forEach(group => group.items.forEach(it => {
-  PRODUCTS[it.name] = { price: it.price, torta: !!group.torta };
+  PRODUCTS[it.name] = { price: it.price, torta: !!group.torta, min: it.min || 1 };
 }));
+function minQtyFor(name) { return (PRODUCTS[name] && PRODUCTS[name].min) || 1; }
 
 function isTortaName(name) { return !!(PRODUCTS[name] && PRODUCTS[name].torta); }
 function formatCLP(n) { return '$' + Number(n).toLocaleString('es-CL'); }
+// Local-date ISO (YYYY-MM-DD) for today + n days.
+// Uses local components — NOT toISOString(), which shifts to UTC and can drop a
+// day in timezones ahead of UTC (that made the 72h rule leave the 3rd day open).
 function isoPlusDays(n) {
   const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + n);
-  return d.toISOString().split('T')[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 function formatDate(iso) {
   if (!iso) return iso;
@@ -78,12 +85,49 @@ function formatDate(iso) {
   return `${day}/${m}/${y}`;
 }
 
+/* ---------- Real-name validation ---------- */
+function isValidName(raw) {
+  const name = (raw || '').trim().replace(/\s+/g, ' ');
+  if (!name) return false;
+  const words = name.split(' ');
+  if (words.length < 2) return false;                       // nombre + apellido
+  const onlyLetters = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+$/;
+  for (const w of words) {
+    if (w.length < 3) return false;                         // 3+ chars per word
+    if (!onlyLetters.test(w)) return false;                 // letters/accents/ñ/ü only
+  }
+  const low = name.toLowerCase();
+  const joined = low.replace(/ /g, '');
+  const blacklist = ['test', 'prueba', 'asdf', 'xxxx', 'aaaa', 'ninguno', 'anonimo', 'unknown', 'fake', 'hola'];
+  if (words.some(w => blacklist.includes(w)) || blacklist.includes(joined)) return false;
+  const seqs = ['aaa', 'xxx', 'asdf', 'qwerty', 'zxcv'];
+  if (seqs.some(s => joined.includes(s))) return false;     // keyboard walks / repeats
+  if (/(.)\1\1/.test(joined)) return false;                 // any char repeated 3+ times
+  return true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initNav();
   initReveal();
   initFaq();
+  initHeroCarousel();
+  initMenuAccordion();
   initOrderCart();
 });
+
+/* ---------- Hero photo carousel (auto fade, no controls) ---------- */
+function initHeroCarousel() {
+  const slides = document.querySelectorAll('.hero-carousel .hc-slide');
+  if (slides.length < 2) return;
+  // Respect users who prefer reduced motion: show the first photo only.
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let i = 0;
+  setInterval(() => {
+    slides[i].classList.remove('is-active');
+    i = (i + 1) % slides.length;
+    slides[i].classList.add('is-active');
+  }, 3500);
+}
 
 /* ---------- Mobile navigation ---------- */
 function initNav() {
@@ -105,6 +149,54 @@ function initReveal() {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { threshold: 0.12 });
   els.forEach(e => io.observe(e));
+}
+
+/* ---------- Menu category accordions (expanded by default) ---------- */
+function initMenuAccordion() {
+  const blocks = document.querySelectorAll('.cat-block');
+  if (!blocks.length) return;
+  blocks.forEach(block => {
+    const title = block.querySelector('.cat-title');
+    const grid = block.querySelector('.menu-grid');
+    if (!title || !grid) return;
+
+    const tog = document.createElement('span');
+    tog.className = 'cat-toggle';
+    tog.setAttribute('aria-hidden', 'true');
+    tog.textContent = '▼';
+    title.appendChild(tog);
+
+    title.setAttribute('role', 'button');
+    title.setAttribute('tabindex', '0');
+    title.setAttribute('aria-expanded', 'true');
+
+    const toggle = () => {
+      const isOpen = !block.classList.contains('collapsed');
+      grid.style.overflow = 'hidden';
+      if (isOpen) {                                   // collapse
+        grid.style.maxHeight = grid.scrollHeight + 'px';
+        requestAnimationFrame(() => requestAnimationFrame(() => { grid.style.maxHeight = '0px'; }));
+        block.classList.add('collapsed');
+        title.setAttribute('aria-expanded', 'false');
+      } else {                                        // expand
+        block.classList.remove('collapsed');
+        title.setAttribute('aria-expanded', 'true');
+        grid.style.maxHeight = grid.scrollHeight + 'px';
+        const done = (ev) => {
+          if (ev.propertyName !== 'max-height') return;
+          grid.style.maxHeight = 'none';
+          grid.style.overflow = '';                   // restore so hover shadows aren't clipped
+          grid.removeEventListener('transitionend', done);
+        };
+        grid.addEventListener('transitionend', done);
+      }
+    };
+
+    title.addEventListener('click', toggle);
+    title.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
 }
 
 /* ---------- FAQ accordion ---------- */
@@ -139,6 +231,8 @@ function initOrderCart() {
   const submitBtn = form.querySelector('#submitBtn');
   const comunaWrap = form.querySelector('.comuna-wrap');
   const comunaInput = comunaWrap ? comunaWrap.querySelector('input') : null;
+  const nameInput = form.querySelector('[name="nombre"]');
+  const nameError = form.querySelector('[data-name-error]');
 
   // Build the <option> markup once and clone per row.
   const optionsHTML = '<option value="" disabled selected>Selecciona un producto…</option>' +
@@ -157,10 +251,29 @@ function initOrderCart() {
       `<button type="button" class="row-remove" aria-label="Quitar producto">✕</button>` +
       `<span class="row-subtotal"></span>`;
     rowsWrap.appendChild(row);
-    if (preselect && PRODUCTS[preselect]) row.querySelector('.row-product').value = preselect;
+    const prodSel = row.querySelector('.row-product');
+    const qtyInp = row.querySelector('.row-qty');
 
-    row.querySelector('.row-product').addEventListener('change', update);
-    row.querySelector('.row-qty').addEventListener('input', update);
+    if (preselect && PRODUCTS[preselect]) {
+      prodSel.value = preselect;
+      const pmin = minQtyFor(preselect);
+      qtyInp.min = pmin; qtyInp.value = pmin;
+    }
+
+    // Selecting a product snaps the quantity up to that product's minimum.
+    prodSel.addEventListener('change', () => {
+      const pmin = minQtyFor(prodSel.value);
+      qtyInp.min = pmin;
+      if (!qtyInp.value || parseInt(qtyInp.value, 10) < pmin) qtyInp.value = pmin;
+      update();
+    });
+    qtyInp.addEventListener('input', update);
+    // Clamp back up to the minimum when the field loses focus.
+    qtyInp.addEventListener('blur', () => {
+      const pmin = minQtyFor(prodSel.value);
+      if (!qtyInp.value || parseInt(qtyInp.value, 10) < pmin) qtyInp.value = pmin;
+      update();
+    });
     row.querySelector('.row-remove').addEventListener('click', () => { row.remove(); update(); });
     update();
   }
@@ -171,22 +284,28 @@ function initOrderCart() {
       let qty = parseInt(row.querySelector('.row-qty').value, 10);
       if (!qty || qty < 1) qty = 1;
       const info = PRODUCTS[name];
-      return { row, name, qty, price: info ? info.price : undefined, torta: info ? info.torta : false };
+      return { row, name, qty, price: info ? info.price : undefined, torta: info ? info.torta : false, min: minQtyFor(name) };
     });
   }
 
   function update() {
     const cart = readCart();
-    let total = 0, hasConsultar = false, hasTorta = false, validItems = 0;
+    let total = 0, hasConsultar = false, hasTorta = false, validItems = 0, belowMin = false;
 
     // Per-row subtotals
     cart.forEach(it => {
       const subEl = it.row.querySelector('.row-subtotal');
-      if (!it.name) { subEl.textContent = ''; return; }
+      const qtyInp = it.row.querySelector('.row-qty');
+      if (!it.name) { subEl.textContent = ''; qtyInp.min = 1; return; }
+      qtyInp.min = it.min;
       validItems++;
       if (it.torta) hasTorta = true;
-      if (it.price == null) { subEl.innerHTML = '<small>A confirmar</small>'; hasConsultar = true; }
-      else { const sub = it.price * it.qty; total += sub; subEl.textContent = formatCLP(sub); }
+      const belowThis = it.qty < it.min;
+      if (belowThis) belowMin = true;
+      qtyInp.classList.toggle('input-error', belowThis);
+      const hint = it.min > 1 ? `<small>mín. ${it.min} uni</small>` : '';
+      if (it.price == null) { subEl.innerHTML = '<small>A confirmar</small>' + hint; hasConsultar = true; }
+      else { const sub = it.price * it.qty; total += sub; subEl.innerHTML = formatCLP(sub) + hint; }
     });
 
     // Breakdown + total
@@ -216,12 +335,22 @@ function initOrderCart() {
         `Las tortas requieren un mínimo de 72 horas de anticipación. La fecha más próxima disponible es ${formatDate(minISO)}.`;
     }
 
-    // Enable submit only with items and (no torta OR a valid future date)
-    const blocked = validItems === 0 || dateBlocksTorta;
+    // Enable submit only with items, quantities meeting each minimum, a valid
+    // future date (if torta) and a real name.
+    const blocked = validItems === 0 || belowMin || dateBlocksTorta || !isValidName(nameInput.value);
     submitBtn.disabled = blocked;
     submitBtn.classList.toggle('is-disabled', blocked);
     form.dataset.torta = hasTorta ? '1' : '0';
   }
+
+  // Name validation: live button state on input; red message on blur.
+  nameInput.addEventListener('input', update);
+  nameInput.addEventListener('blur', () => {
+    const bad = !!nameInput.value.trim() && !isValidName(nameInput.value);
+    nameError.classList.toggle('field-hidden', !bad);
+    nameInput.classList.toggle('input-error', bad);
+    update();
+  });
 
   // Delivery / pickup toggle
   form.querySelectorAll('input[name="entrega"]').forEach(r => r.addEventListener('change', () => {
@@ -264,12 +393,26 @@ function buildCartMessage(form) {
 
   if (!cart.length) { alert('Agrega al menos un producto a tu pedido.'); return null; }
 
-  const nombre = (form.querySelector('[name="nombre"]').value || '').trim();
+  // Enforce per-product minimum quantities.
+  const under = cart.find(it => it.qty < minQtyFor(it.name));
+  if (under) {
+    alert(`"${under.name}" tiene un mínimo de ${minQtyFor(under.name)} unidades. Ajusta la cantidad.`);
+    return null;
+  }
+
+  const nameEl = form.querySelector('[name="nombre"]');
+  const nombre = (nameEl.value || '').trim().replace(/\s+/g, ' ');
   const fecha = form.querySelector('[name="fecha"]').value;
   const nota = (form.querySelector('[name="nota"]').value || '').trim();
   const entregaEl = form.querySelector('input[name="entrega"]:checked');
 
-  if (!nombre) { alert('Por favor escribe tu nombre.'); form.querySelector('[name="nombre"]').focus(); return null; }
+  if (!isValidName(nombre)) {
+    const err = form.querySelector('[data-name-error]');
+    if (err) err.classList.remove('field-hidden');
+    nameEl.classList.add('input-error');
+    nameEl.focus();
+    return null;
+  }
   if (!fecha) { alert('Por favor elige una fecha.'); form.querySelector('[name="fecha"]').focus(); return null; }
   if (!entregaEl) { alert('Por favor elige cómo recibir tu pedido.'); return null; }
 
