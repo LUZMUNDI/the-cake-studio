@@ -15,7 +15,6 @@ const TORTA_LEAD_DAYS = 3;
 /* ---------- Product catalog (price in CLP, null = "Consultar") ---------- */
 const CATALOG = [
   { g: '🎂 Tortas', torta: true, items: [
-    { name: 'Chocoquesillo (Sin Gluten)', price: null },
     { name: 'Torta Rose', price: 45000 },
     { name: 'Torta Brownie Cotillón', price: 47990 },
     { name: 'Torta ILove', price: 47990 },
@@ -23,17 +22,18 @@ const CATALOG = [
     { name: 'Torta Maceta', price: 14990 },
     { name: 'Torta Nona', price: 70000 },
     { name: 'Cheesecake de Frambuesa', price: 29990 },
-    { name: 'Chocoquesillo Familiar', price: 47600 },
+    { name: 'Chocoquesillo Familiar', price: null },
   ]},
   { g: '🍮 Postres', items: [
     { name: 'Tres Leches', price: 6990 },
     { name: 'Mini Chocoquesillo', price: 10400 },
     { name: 'Mini Postres Shots (mín. 6)', price: 1500, min: 6 },
     { name: 'Mini Postres Gourmet Shot (mín. 6)', price: 1800, min: 6 },
-    { name: 'Cheesecake de Chocolate', price: 4990 },
+    { name: 'Cheesecake de Frambuesa (porción)', price: 5990 },
+    { name: 'Cheesecake de Chocolate', price: 5990 },
     { name: 'Roll de Canela', price: 3990 },
-    { name: 'Marble Cake', price: null },
-    { name: 'Red Velvet', price: 4990 },
+    { name: 'Marble Cake', price: 4500 },
+    { name: 'Red Velvet', price: 5990 },
     { name: 'Volcán de Chocolate (2 uni)', price: 4990 },
     { name: 'Pie de Limón', price: 2990 },
     { name: 'Brownie (2 uni)', price: 3500 },
@@ -42,12 +42,12 @@ const CATALOG = [
   { g: '🧁 Muffins y Magdalenas', items: [
     { name: 'Muffin Chips de Chocolate (2 uni)', price: 4990 },
     { name: 'Magdalena (2 uni)', price: 2500 },
-    { name: 'Cupcake (2 uni)', price: 3990 },
+    { name: 'Cupcake (2 uni)', price: 4990 },
   ]},
   { g: '🍪 Galletas', items: [
     { name: 'Galletitas Pasta Seca (200g)', price: 6500 },
     { name: 'Galleta New York', price: 2990, min: 4 },
-    { name: 'Galletas Craqueladas', price: 10990 },
+    { name: 'Galletas Craqueladas (200g)', price: 5990 },
   ]},
   { g: '🥐 Bollería Venezolana', items: [
     { name: 'Golfeados (2 uni)', price: 4990 },
