@@ -7,9 +7,10 @@
 
 /* ---------- Tokens ---------- */
 :root {
-  /* Site is light-only — stops mobile dark mode from painting the root canvas
-     (and UA form controls) black. */
-  color-scheme: light;
+  /* Site is light-only. "only light" is the strongest opt-out: it stops mobile
+     browsers' auto/forced dark mode (Chrome auto-dark, Samsung Internet, WebView)
+     from repainting the page's background dark. */
+  color-scheme: only light;
   --cream: #FFFDF9;
   --cream-2: #FBF3EC;
   --cream-3: #F6E9DE;
@@ -33,7 +34,7 @@
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; background: var(--cream); }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; background: var(--cream); color-scheme: only light; }
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: var(--cream);
@@ -647,38 +648,7 @@ h1, h2, h3, .serif {
 .identity .imgs img:first-child { grid-column: span 2; aspect-ratio: 2/1.2; }
 @media (max-width: 860px){ .identity { grid-template-columns: 1fr; padding: 34px 26px; } }
 
-/* ============================================================
-   MODAL
-   ============================================================ */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 300;
-  background: rgba(42,32,36,.55); backdrop-filter: blur(4px);
-  display: none; align-items: center; justify-content: center; padding: 20px;
-  opacity: 0; transition: opacity .3s;
-}
-.modal-overlay.show { display: flex; opacity: 1; }
-.modal {
-  background: var(--cream); border-radius: var(--radius-lg);
-  width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
-  box-shadow: var(--shadow-lg); transform: translateY(20px) scale(.98);
-  transition: transform .35s var(--ease);
-}
-.modal-overlay.show .modal { transform: translateY(0) scale(1); }
-.modal-head {
-  position: relative; padding: 26px 28px 20px;
-  background: linear-gradient(135deg, var(--fuchsia), #ff5fa9); color:#fff;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-.modal-head h3 { color:#fff; font-size: 1.5rem; }
-.modal-head p { color: rgba(255,255,255,.9); font-size: .9rem; margin-top: 2px; }
-.modal-close {
-  position:absolute; top: 18px; right: 18px; width: 34px; height:34px; border-radius:50%;
-  background: rgba(255,255,255,.22); color:#fff; font-size: 1.2rem; display:grid; place-items:center;
-  transition: background .2s;
-}
-.modal-close:hover { background: rgba(255,255,255,.38); }
-.modal-body { padding: 26px 28px 30px; }
-.modal-body .btn { margin-top: 8px; }
+/* order-form fine print (kept from the old modal) */
 .modal-fine { text-align:center; color: var(--ink-soft); font-size: .8rem; margin-top: 14px; }
 
 /* ---------- reveal-on-scroll ---------- */
