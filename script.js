@@ -47,7 +47,7 @@ const CATALOG = [
   { g: '🍪 Galletas', items: [
     { name: 'Galletitas Pasta Seca (200g)', price: 6500 },
     { name: 'Galleta New York', price: 2990, min: 4 },
-    { name: 'Galletas Craqueladas (200g)', price: 5990 },
+    { name: 'Galletas Polvorosas (200g)', price: 5990 },
   ]},
   { g: '🥐 Bollería Venezolana', items: [
     { name: 'Golfeados (2 uni)', price: 4990 },

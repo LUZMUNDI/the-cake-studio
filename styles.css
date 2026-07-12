@@ -387,6 +387,8 @@ h1, h2, h3, .serif {
 .footer h4 { font-family:'Inter',sans-serif; font-size: .78rem; letter-spacing:.18em; text-transform:uppercase; color:#fff; margin-bottom: 16px; }
 .footer ul li { margin-bottom: 10px; }
 .footer ul a, .footer .contact a, .footer .contact div { color:#C9B2BC; font-size: .94rem; transition: color .2s; display:flex; gap:9px; align-items:flex-start; }
+.footer .contact a { align-items: center; }
+.ig-ic { width: 16px; height: 16px; flex: none; }
 .footer ul a:hover, .footer .contact a:hover { color: var(--fuchsia); }
 .footer .contact > * { margin-bottom: 12px; }
 .footer-bottom {
