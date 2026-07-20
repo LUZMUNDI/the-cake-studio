@@ -282,6 +282,7 @@ h1, h2, h3, .serif {
 }
 .star-body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
 .star-body h3 { font-size: 1.4rem; }
+.star-body .meta { flex: none; color: var(--fuchsia); font-weight: 600; font-size: .8rem; margin: 4px 0 0; }
 .star-body p { color: var(--ink-soft); font-size: .95rem; margin: 8px 0 18px; flex: 1; }
 .star-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .price { font-family:'Playfair Display',serif; font-weight:700; font-size: 1.2rem; color: var(--fuchsia); }
