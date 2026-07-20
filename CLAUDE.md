@@ -48,9 +48,16 @@ los productos y haga pedidos por WhatsApp con el menor roce posible.
   `como-pedir.html?add=<Nombre exacto del CATALOG>#pedir` que precargan ese producto.
   Nav/hero/CTA "Hacer mi Pedido" enlazan a `como-pedir.html#pedir` (form limpio).
   Ya **no** hay modal ni `data-product`.
-- **Mensaje** se envía a `https://wa.me/56926937751?text=...` (el link corto
-  `wa.me/message/6TMTI4ZZF26OK1` NO admite `?text=`; solo botón flotante/contacto).
+- **Mensaje** se envía a `https://wa.me/56926937751?text=...`. Siempre usar el link
+  del **número** para prellenar texto (el link corto `wa.me/message/6TMTI4ZZF26OK1`
+  NO admite `?text=` y ya no se usa).
 - Delivery muestra "comuna"; Retiro lo oculta. Validación en `buildCartMessage()`.
+
+## WhatsApp general (botón flotante + contacto footer)
+- El botón flotante `.wa-float` y el link de WhatsApp del footer (las 4 páginas)
+  abren `https://wa.me/56926937751?text=<saludo>` con un saludo fijo de marca
+  (cálido, venezolano-chileno; usa "se me antojó", "hecho con amor"). Distinto del
+  mensaje dinámico del carrito. Si editas el saludo, hazlo igual en las 4 páginas.
 
 ## Regla 72 h (carrito)
 - Si el carrito tiene ≥1 torta (marcada en `CATALOG` con `torta:true`), se activa
